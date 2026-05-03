@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -7,7 +8,9 @@ from app.ai.embeddings import EmbeddingError
 from app.api.dependencies import get_chat_service
 from app.api.schemas import ChatRequest, ChatResponse
 from app.domain.chat.service import ChatService, InvalidChatMessageError
+from app.storage.chroma_store import VectorStoreError
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["chat"])
 
 
@@ -26,7 +29,8 @@ def answer_chat_question(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
-    except (AnswerGenerationError, EmbeddingError) as exc:
+    except (AnswerGenerationError, EmbeddingError, VectorStoreError) as exc:
+        logger.exception("Chat request failed during retrieval or answer generation.")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=str(exc),

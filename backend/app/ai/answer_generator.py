@@ -1,4 +1,4 @@
-from typing import Protocol
+from typing import Any, Protocol
 
 from openai import OpenAI, OpenAIError
 from pydantic import ValidationError
@@ -16,8 +16,12 @@ class AnswerGenerationError(Exception):
     """Raised when the answer provider returns unusable output."""
 
 
+class _ResponsesResource(Protocol):
+    def create(self, **kwargs: Any) -> Any: ...
+
+
 class _AnswerClient(Protocol):
-    responses: object
+    responses: _ResponsesResource
 
 
 class AnswerGenerator:

@@ -1,6 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from app.ai.answer_generator import AnswerGenerationError
+from app.ai.embeddings import EmbeddingError
 from app.ai.models import Citation, RetrievedChunk
 from app.api.dependencies import get_chat_service, get_folder_indexing_service
 from app.api.schemas import ChatResponse
@@ -8,6 +10,7 @@ from app.domain.chat.service import InvalidChatMessageError
 from app.domain.documents.models import SkippedFile
 from app.domain.folders.models import IndexedFolder
 from app.main import app
+from app.storage.chroma_store import VectorStoreError
 
 
 @pytest.fixture
@@ -44,12 +47,20 @@ class FakeFolderIndexingService:
 
 
 class FakeChatService:
-    def __init__(self, response: ChatResponse | None = None) -> None:
+    def __init__(
+        self,
+        response: ChatResponse | None = None,
+        error: Exception | None = None,
+    ) -> None:
         self.response = response
+        self.error = error
         self.calls: list[dict[str, str]] = []
 
     def answer_question(self, folder_id: str, message: str) -> ChatResponse:
         self.calls.append({"folder_id": folder_id, "message": message})
+        if self.error is not None:
+            raise self.error
+
         if self.response is None:
             raise InvalidChatMessageError("Chat message is required.")
 
@@ -162,3 +173,28 @@ def test_chat_returns_answer_response(client: TestClient) -> None:
     assert service.calls == [
         {"folder_id": "folder-123", "message": "What is the plan?"}
     ]
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        EmbeddingError("Could not create embeddings."),
+        VectorStoreError("Could not search vector store."),
+        AnswerGenerationError("Could not generate a valid answer."),
+    ],
+)
+def test_chat_logs_known_system_failures_and_returns_502(
+    client: TestClient,
+    caplog: pytest.LogCaptureFixture,
+    error: Exception,
+) -> None:
+    app.dependency_overrides[get_chat_service] = lambda: FakeChatService(error=error)
+
+    response = client.post(
+        "/api/chat",
+        json={"folder_id": "folder-123", "message": "What is the plan?"},
+    )
+
+    assert response.status_code == 502
+    assert response.json()["detail"] == str(error)
+    assert "Chat request failed during retrieval or answer generation." in caplog.text
