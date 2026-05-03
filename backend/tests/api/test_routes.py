@@ -68,6 +68,22 @@ def test_index_folder_returns_401_without_authorization(client: TestClient) -> N
     )
 
 
+def test_index_folder_cors_preflight_does_not_return_405(
+    client: TestClient,
+) -> None:
+    response = client.options(
+        "/api/folders/index",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "Authorization, Content-Type",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+
+
 def test_index_folder_returns_summary_when_authorized(client: TestClient) -> None:
     service = FakeFolderIndexingService()
     app.dependency_overrides[get_folder_indexing_service] = lambda: service

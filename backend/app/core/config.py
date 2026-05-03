@@ -15,6 +15,7 @@ class Settings:
     openai_embedding_model: str
     openai_answer_model: str
     chroma_path: str
+    frontend_origin: str | None
 
 
 @lru_cache
@@ -29,4 +30,5 @@ def get_settings() -> Settings:
         ),
         openai_answer_model=os.getenv("OPENAI_ANSWER_MODEL", "gpt-4.1-mini"),
         chroma_path=os.getenv("CHROMA_PATH", ".chroma"),
+        frontend_origin=os.getenv("FRONTEND_ORIGIN"),
     )

@@ -91,4 +91,5 @@ def _settings(model: str) -> Settings:
         openai_embedding_model=model,
         openai_answer_model="test-answer-model",
         chroma_path=".chroma-test",
+        frontend_origin="http://localhost:5173",
     )

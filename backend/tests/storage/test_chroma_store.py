@@ -88,6 +88,7 @@ def _store(tmp_path: Path) -> ChromaVectorStore:
             openai_embedding_model="text-embedding-3-small",
             openai_answer_model="gpt-4.1-mini",
             chroma_path=str(tmp_path / "chroma"),
+            frontend_origin="http://localhost:5173",
         )
     )
 
