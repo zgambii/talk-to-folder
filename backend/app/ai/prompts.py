@@ -8,9 +8,26 @@ def build_answer_prompt(question: str, chunks: list[RetrievedChunk]) -> str:
     return f"""You answer questions about an indexed Google Drive folder.
 
 Use only the provided context. Do not invent facts.
-If the context is insufficient, say that you do not know.
-Every citation must reference one of the provided chunk_ids.
+Return only a valid JSON object. Do not wrap the JSON in markdown.
+Do not include extra commentary before or after the JSON.
+If the context is insufficient, return a low-confidence JSON answer with an
+empty citations array.
+Every citation.chunk_id must exactly match one of the provided chunk_id values.
 Citation quotes must be short and copied exactly from the provided chunk text.
+
+The JSON object must match this shape:
+{{
+  "answer": "string",
+  "confidence": "low | medium | high",
+  "citations": [
+    {{
+      "chunk_id": "string",
+      "document_name": "string",
+      "source_url": "string or null",
+      "quote": "short exact quote from the retrieved chunk"
+    }}
+  ]
+}}
 
 Question:
 {question}

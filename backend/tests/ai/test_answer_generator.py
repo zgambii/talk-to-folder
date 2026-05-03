@@ -123,7 +123,9 @@ def test_build_answer_prompt_includes_question_and_chunk_details() -> None:
     assert "chunk_id: chunk-1" in prompt
     assert "document_name: Plan" in prompt
     assert "chunk_index: 2" in prompt
-    assert "Only" not in prompt
+    assert "Return only a valid JSON object." in prompt
+    assert "Do not wrap the JSON in markdown." in prompt
+    assert '"confidence": "low | medium | high"' in prompt
     assert "Use only the provided context." in prompt
 
 
