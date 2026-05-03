@@ -86,6 +86,7 @@ def _store(tmp_path: Path) -> ChromaVectorStore:
         settings=Settings(
             openai_api_key=None,
             openai_embedding_model="text-embedding-3-small",
+            openai_answer_model="gpt-4.1-mini",
             chroma_path=str(tmp_path / "chroma"),
         )
     )

@@ -89,5 +89,6 @@ def _settings(model: str) -> Settings:
     return Settings(
         openai_api_key="test-key",
         openai_embedding_model=model,
+        openai_answer_model="test-answer-model",
         chroma_path=".chroma-test",
     )

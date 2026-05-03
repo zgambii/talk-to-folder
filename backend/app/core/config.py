@@ -13,6 +13,7 @@ class Settings:
 
     openai_api_key: str | None
     openai_embedding_model: str
+    openai_answer_model: str
     chroma_path: str
 
 
@@ -26,5 +27,6 @@ def get_settings() -> Settings:
             "OPENAI_EMBEDDING_MODEL",
             "text-embedding-3-small",
         ),
+        openai_answer_model=os.getenv("OPENAI_ANSWER_MODEL", "gpt-4.1-mini"),
         chroma_path=os.getenv("CHROMA_PATH", ".chroma"),
     )
