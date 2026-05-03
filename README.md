@@ -48,6 +48,7 @@ uvicorn app.main:app --reload
 Useful commands:
 
 ```bash
+pytest
 ruff check .
 black --check .
 ```
