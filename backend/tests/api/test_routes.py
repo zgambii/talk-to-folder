@@ -11,6 +11,7 @@ from app.domain.documents.models import SkippedFile
 from app.domain.folders.models import IndexedFolder
 from app.main import app
 from app.storage.chroma_store import VectorStoreError
+from app.storage.supabase_vector_store import SupabaseVectorStoreError
 
 
 @pytest.fixture
@@ -23,11 +24,15 @@ def client() -> TestClient:
 
 
 class FakeFolderIndexingService:
-    def __init__(self) -> None:
+    def __init__(self, error: Exception | None = None) -> None:
+        self.error = error
         self.folder_urls: list[str] = []
 
     def index_folder(self, folder_url: str) -> IndexedFolder:
         self.folder_urls.append(folder_url)
+        if self.error is not None:
+            raise self.error
+
         return IndexedFolder(
             folder_id="folder-123",
             folder_url=folder_url,
@@ -126,6 +131,32 @@ def test_index_folder_returns_summary_when_authenticated(client: TestClient) -> 
         ],
     }
     assert service.folder_urls == ["https://drive.google.com/drive/folders/folder-123"]
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        VectorStoreError("Could not update local vector store."),
+        SupabaseVectorStoreError("Could not delete document chunks."),
+    ],
+)
+def test_index_folder_logs_vector_store_failures_and_returns_502(
+    client: TestClient,
+    caplog: pytest.LogCaptureFixture,
+    error: Exception,
+) -> None:
+    app.dependency_overrides[get_folder_indexing_service] = lambda: (
+        FakeFolderIndexingService(error=error)
+    )
+
+    response = client.post(
+        "/api/folders/index",
+        json={"folder_url": "https://drive.google.com/drive/folders/folder-123"},
+    )
+
+    assert response.status_code == 502
+    assert response.json()["detail"] == str(error)
+    assert "Folder indexing failed while updating the vector store." in caplog.text
 
 
 def test_chat_returns_400_for_empty_message(client: TestClient) -> None:

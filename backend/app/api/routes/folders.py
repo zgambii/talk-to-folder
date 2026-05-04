@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -8,7 +9,10 @@ from app.api.schemas import IndexFolderRequest, IndexFolderResponse
 from app.domain.folders.parser import InvalidDriveFolderUrlError
 from app.domain.folders.service import FolderIndexingService
 from app.integrations.google.drive import GoogleDriveIntegrationError
+from app.storage.chroma_store import VectorStoreError
+from app.storage.supabase_vector_store import SupabaseVectorStoreError
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/folders", tags=["folders"])
 
 
@@ -30,6 +34,13 @@ def index_folder(
             detail=str(exc),
         ) from exc
     except EmbeddingError as exc:
+        logger.exception("Folder indexing failed during embedding.")
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=str(exc),
+        ) from exc
+    except (VectorStoreError, SupabaseVectorStoreError) as exc:
+        logger.exception("Folder indexing failed while updating the vector store.")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=str(exc),
