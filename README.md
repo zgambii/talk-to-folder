@@ -60,7 +60,7 @@ The base prompt asks for a user to paste a Drive folder link and chat with the f
 
 ## Documentation
 
-Detail lives in `docs/` so this README stays a short entry point; GitHub still renders it first.
+Detail lives in `docs/` so this README stays a short entry point
 
 | Doc | What it covers |
 |-----|----------------|
