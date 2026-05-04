@@ -16,6 +16,12 @@ class Settings:
     openai_answer_model: str
     chroma_path: str
     frontend_origin: str | None
+    app_env: str
+    google_client_id: str | None
+    google_client_secret: str | None
+    google_redirect_uri: str
+    frontend_url: str
+    session_secret_key: str
 
 
 @lru_cache
@@ -31,4 +37,13 @@ def get_settings() -> Settings:
         openai_answer_model=os.getenv("OPENAI_ANSWER_MODEL", "gpt-4.1-mini"),
         chroma_path=os.getenv("CHROMA_PATH", ".chroma"),
         frontend_origin=os.getenv("FRONTEND_ORIGIN"),
+        app_env=os.getenv("APP_ENV", "development"),
+        google_client_id=os.getenv("GOOGLE_CLIENT_ID"),
+        google_client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+        google_redirect_uri=os.getenv(
+            "GOOGLE_REDIRECT_URI",
+            "http://localhost:8000/api/auth/google/callback",
+        ),
+        frontend_url=os.getenv("FRONTEND_URL", "http://localhost:5173"),
+        session_secret_key=os.getenv("SESSION_SECRET_KEY", "dev-session-secret"),
     )

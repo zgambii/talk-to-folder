@@ -1,13 +1,20 @@
-import { useState } from 'react';
-import { indexFolder, sendChatMessage } from './api/client';
-import AccessTokenInput from './components/AccessTokenInput';
+import { useEffect, useState } from 'react';
+import {
+  getAuthStatus,
+  googleLoginUrl,
+  indexFolder,
+  logout,
+  sendChatMessage,
+} from './api/client';
 import ChatPanel from './components/ChatPanel';
 import FolderIndexer from './components/FolderIndexer';
+import GoogleConnect from './components/GoogleConnect';
 import IndexingSummary from './components/IndexingSummary';
 import type { ChatResponse, IndexFolderResponse } from './types/api';
 
 function App() {
-  const [accessToken, setAccessToken] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [folderUrl, setFolderUrl] = useState('');
   const [indexingSummary, setIndexingSummary] =
     useState<IndexFolderResponse | null>(null);
@@ -18,7 +25,39 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   const folderId = indexingSummary?.folder_id ?? null;
-  const canIndex = accessToken.trim().length > 0 && folderUrl.trim().length > 0;
+  const canIndex = isAuthenticated && folderUrl.trim().length > 0;
+
+  useEffect(() => {
+    async function loadAuthStatus() {
+      try {
+        const status = await getAuthStatus();
+        setIsAuthenticated(status.authenticated);
+      } catch (caughtError) {
+        setError(errorMessage(caughtError));
+      } finally {
+        setIsAuthLoading(false);
+      }
+    }
+
+    void loadAuthStatus();
+  }, []);
+
+  function handleConnectGoogle() {
+    window.location.assign(googleLoginUrl());
+  }
+
+  async function handleLogout() {
+    setError(null);
+
+    try {
+      await logout();
+      setIsAuthenticated(false);
+      setIndexingSummary(null);
+      setChatResponse(null);
+    } catch (caughtError) {
+      setError(errorMessage(caughtError));
+    }
+  }
 
   async function handleIndexFolder() {
     setIsIndexing(true);
@@ -28,7 +67,6 @@ function App() {
     try {
       const summary = await indexFolder({
         folderUrl,
-        accessToken,
       });
       setIndexingSummary(summary);
     } catch (caughtError) {
@@ -65,8 +103,8 @@ function App() {
         <p className="eyebrow">Talk to Folder</p>
         <h1>Ask grounded questions about a Google Drive folder.</h1>
         <p>
-          Paste a Drive access token, index a folder, then ask questions backed
-          by retrieved sources.
+          Connect Google Drive, index a folder, then ask questions backed by
+          retrieved sources.
         </p>
       </header>
 
@@ -74,14 +112,17 @@ function App() {
 
       <div className="content-grid">
         <div className="stack">
-          <AccessTokenInput
-            accessToken={accessToken}
-            onAccessTokenChange={setAccessToken}
+          <GoogleConnect
+            isAuthenticated={isAuthenticated}
+            isLoading={isAuthLoading}
+            onConnect={handleConnectGoogle}
+            onLogout={handleLogout}
           />
           <FolderIndexer
             folderUrl={folderUrl}
             isIndexing={isIndexing}
             canIndex={canIndex}
+            isAuthenticated={isAuthenticated}
             onFolderUrlChange={setFolderUrl}
             onIndexFolder={handleIndexFolder}
           />

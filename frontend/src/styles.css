@@ -37,6 +37,11 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.secondary-button {
+  background: #e2e8f0;
+  color: #172033;
+}
+
 a {
   color: #2563eb;
   font-weight: 700;
@@ -111,6 +116,20 @@ a {
 .muted {
   color: #667085;
   margin: 0;
+}
+
+.inline-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.status-pill {
+  background: #dcfce7;
+  border-radius: 999px;
+  color: #166534;
+  font-weight: 800;
+  padding: 0.45rem 0.8rem;
 }
 
 .field {

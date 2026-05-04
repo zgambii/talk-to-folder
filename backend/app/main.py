@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
+from app.api.routes.auth import router as auth_router
 from app.api.routes.chat import router as chat_router
 from app.api.routes.folders import router as folders_router
 from app.core.config import get_settings
@@ -14,6 +16,18 @@ allowed_origins = [
 ]
 if settings.frontend_origin is not None:
     allowed_origins.append(settings.frontend_origin)
+if settings.frontend_url not in allowed_origins:
+    allowed_origins.append(settings.frontend_url)
+
+session_cookie_secure = settings.app_env == "production"
+session_same_site = "none" if session_cookie_secure else "lax"
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.session_secret_key,
+    same_site=session_same_site,
+    https_only=session_cookie_secure,
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,6 +37,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+app.include_router(auth_router)
 app.include_router(folders_router)
 app.include_router(chat_router)
 

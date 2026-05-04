@@ -67,16 +67,21 @@ class FakeChatService:
         return self.response
 
 
-def test_index_folder_returns_401_without_authorization(client: TestClient) -> None:
+def test_auth_me_returns_unauthenticated_without_session(client: TestClient) -> None:
+    response = client.get("/api/auth/me")
+
+    assert response.status_code == 200
+    assert response.json() == {"authenticated": False}
+
+
+def test_index_folder_returns_401_without_session(client: TestClient) -> None:
     response = client.post(
         "/api/folders/index",
         json={"folder_url": "https://drive.google.com/drive/folders/folder-123"},
     )
 
     assert response.status_code == 401
-    assert response.json()["detail"] == (
-        "Authorization header must be in the form 'Bearer <access_token>'."
-    )
+    assert response.json()["detail"] == "Connect Google Drive before indexing a folder."
 
 
 def test_index_folder_cors_preflight_does_not_return_405(
@@ -95,13 +100,12 @@ def test_index_folder_cors_preflight_does_not_return_405(
     assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
 
 
-def test_index_folder_returns_summary_when_authorized(client: TestClient) -> None:
+def test_index_folder_returns_summary_when_authenticated(client: TestClient) -> None:
     service = FakeFolderIndexingService()
     app.dependency_overrides[get_folder_indexing_service] = lambda: service
 
     response = client.post(
         "/api/folders/index",
-        headers={"Authorization": "Bearer test-token"},
         json={"folder_url": "https://drive.google.com/drive/folders/folder-123"},
     )
 

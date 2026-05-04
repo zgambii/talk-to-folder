@@ -165,4 +165,10 @@ def _settings() -> Settings:
         openai_answer_model="test-answer-model",
         chroma_path=".chroma-test",
         frontend_origin="http://localhost:5173",
+        app_env="test",
+        google_client_id="test-client-id",
+        google_client_secret="test-client-secret",
+        google_redirect_uri="http://localhost:8000/api/auth/google/callback",
+        frontend_url="http://localhost:5173",
+        session_secret_key="test-session-secret",
     )

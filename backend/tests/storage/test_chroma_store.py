@@ -89,6 +89,12 @@ def _store(tmp_path: Path) -> ChromaVectorStore:
             openai_answer_model="gpt-4.1-mini",
             chroma_path=str(tmp_path / "chroma"),
             frontend_origin="http://localhost:5173",
+            app_env="test",
+            google_client_id="test-client-id",
+            google_client_secret="test-client-secret",
+            google_redirect_uri="http://localhost:8000/api/auth/google/callback",
+            frontend_url="http://localhost:5173",
+            session_secret_key="test-session-secret",
         )
     )
 

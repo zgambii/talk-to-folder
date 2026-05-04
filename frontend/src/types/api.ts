@@ -48,3 +48,11 @@ export type ChatResponse = {
   citations: Citation[];
   retrieved_chunks: RetrievedChunk[];
 };
+
+export type AuthStatusResponse = {
+  authenticated: boolean;
+};
+
+export type LogoutResponse = {
+  success: boolean;
+};

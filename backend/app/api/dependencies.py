@@ -8,19 +8,16 @@ from app.domain.chat.service import ChatService
 from app.domain.folders.service import FolderIndexingService
 from app.integrations.google.drive import GoogleDriveClient
 from app.integrations.google.extraction import GoogleDriveExtractor
+from app.integrations.google.oauth import get_tokens_from_session
 from app.storage.chroma_store import ChromaVectorStore
 
 
-def get_bearer_token(request: Request) -> str:
-    authorization = request.headers.get("Authorization")
-    if authorization is None:
+def get_google_access_token(request: Request) -> str:
+    tokens = get_tokens_from_session(request.session)
+    if tokens is None:
         raise _unauthorized()
 
-    scheme, _, token = authorization.partition(" ")
-    if scheme.lower() != "bearer" or not token.strip():
-        raise _unauthorized()
-
-    return token.strip()
+    return tokens.access_token
 
 
 def get_vector_store() -> ChromaVectorStore:
@@ -36,7 +33,7 @@ def get_answer_generator() -> AnswerGenerator:
 
 
 def get_folder_indexing_service(
-    access_token: Annotated[str, Depends(get_bearer_token)],
+    access_token: Annotated[str, Depends(get_google_access_token)],
     embedding_service: Annotated[EmbeddingService, Depends(get_embedding_service)],
     vector_store: Annotated[ChromaVectorStore, Depends(get_vector_store)],
 ) -> FolderIndexingService:
@@ -63,5 +60,5 @@ def get_chat_service(
 def _unauthorized() -> HTTPException:
     return HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Authorization header must be in the form 'Bearer <access_token>'.",
+        detail="Connect Google Drive before indexing a folder.",
     )

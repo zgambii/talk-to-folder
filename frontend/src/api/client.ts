@@ -1,8 +1,10 @@
 import type {
+  AuthStatusResponse,
   ChatRequest,
   ChatResponse,
   IndexFolderRequest,
   IndexFolderResponse,
+  LogoutResponse,
 } from '../types/api';
 
 const API_BASE_URL =
@@ -11,7 +13,6 @@ const API_BASE_URL =
 
 type IndexFolderParams = {
   folderUrl: string;
-  accessToken: string;
 };
 
 type SendChatMessageParams = {
@@ -21,14 +22,10 @@ type SendChatMessageParams = {
 
 export async function indexFolder({
   folderUrl,
-  accessToken,
 }: IndexFolderParams): Promise<IndexFolderResponse> {
   return postJson<IndexFolderRequest, IndexFolderResponse>(
     '/api/folders/index',
     { folder_url: folderUrl },
-    {
-      Authorization: `Bearer ${accessToken}`,
-    },
   );
 }
 
@@ -42,6 +39,33 @@ export async function sendChatMessage({
   });
 }
 
+export async function getAuthStatus(): Promise<AuthStatusResponse> {
+  return getJson<AuthStatusResponse>('/api/auth/me');
+}
+
+export async function logout(): Promise<LogoutResponse> {
+  return postJson<Record<string, never>, LogoutResponse>(
+    '/api/auth/logout',
+    {},
+  );
+}
+
+export function googleLoginUrl(): string {
+  return `${API_BASE_URL}/api/auth/google/login`;
+}
+
+async function getJson<TResponse>(path: string): Promise<TResponse> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error(await responseErrorMessage(response));
+  }
+
+  return response.json() as Promise<TResponse>;
+}
+
 async function postJson<TRequest, TResponse>(
   path: string,
   body: TRequest,
@@ -49,6 +73,7 @@ async function postJson<TRequest, TResponse>(
 ): Promise<TResponse> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...headers,

@@ -2,6 +2,7 @@ type FolderIndexerProps = {
   folderUrl: string;
   isIndexing: boolean;
   canIndex: boolean;
+  isAuthenticated: boolean;
   onFolderUrlChange: (folderUrl: string) => void;
   onIndexFolder: () => void;
 };
@@ -10,6 +11,7 @@ function FolderIndexer({
   folderUrl,
   isIndexing,
   canIndex,
+  isAuthenticated,
   onFolderUrlChange,
   onIndexFolder,
 }: FolderIndexerProps) {
@@ -35,6 +37,9 @@ function FolderIndexer({
       >
         {isIndexing ? 'Indexing...' : 'Index Folder'}
       </button>
+      {!isAuthenticated && (
+        <p className="muted">Connect Google Drive before indexing a folder.</p>
+      )}
     </section>
   );
 }
