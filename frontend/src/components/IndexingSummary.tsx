@@ -10,20 +10,16 @@ function IndexingSummary({ summary }: IndexingSummaryProps) {
   }
 
   return (
-    <section className="card">
-      <div className="section-heading">
-        <p className="eyebrow">Indexed</p>
-        <h2>Folder summary</h2>
-      </div>
-      <div className="stats-grid">
+    <section className="index-summary">
+      <div className="summary-stats">
         <Stat label="Files found" value={summary.files_found} />
         <Stat label="Files indexed" value={summary.files_indexed} />
         <Stat label="Chunks created" value={summary.chunks_created} />
       </div>
       {summary.skipped_files.length > 0 && (
-        <div className="stack">
-          <h3>Skipped files</h3>
-          <ul className="list">
+        <details className="skipped-files">
+          <summary>Skipped files ({summary.skipped_files.length})</summary>
+          <ul>
             {summary.skipped_files.map((file) => (
               <li key={file.file_id}>
                 <strong>{file.name}</strong>
@@ -31,7 +27,7 @@ function IndexingSummary({ summary }: IndexingSummaryProps) {
               </li>
             ))}
           </ul>
-        </div>
+        </details>
       )}
     </section>
   );
@@ -44,7 +40,7 @@ type StatProps = {
 
 function Stat({ label, value }: StatProps) {
   return (
-    <div className="stat">
+    <div className="summary-stat">
       <span>{label}</span>
       <strong>{value}</strong>
     </div>

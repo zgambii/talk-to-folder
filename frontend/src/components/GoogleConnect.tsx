@@ -12,24 +12,24 @@ function GoogleConnect({
   onLogout,
 }: GoogleConnectProps) {
   return (
-    <section className="card">
-      <div className="section-heading">
-        <p className="eyebrow">Step 1</p>
-        <h2>Connect Google Drive</h2>
-      </div>
-      <p className="muted">
-        Sign in with Google to grant read-only Drive access. The backend stores
-        the token in a signed session cookie.
-      </p>
+    <section className="google-connect">
       {isAuthenticated ? (
-        <div className="inline-actions">
-          <span className="status-pill">Connected</span>
-          <button type="button" className="secondary-button" onClick={onLogout}>
-            Log out
-          </button>
+        <div>
+          <span className="connection-dot" />
+          <div>
+            <strong>Google Drive connected</strong>
+            <button type="button" className="text-button" onClick={onLogout}>
+              Log out
+            </button>
+          </div>
         </div>
       ) : (
-        <button type="button" disabled={isLoading} onClick={onConnect}>
+        <button
+          type="button"
+          className="connect-button"
+          disabled={isLoading}
+          onClick={onConnect}
+        >
           {isLoading ? 'Checking...' : 'Connect Google Drive'}
         </button>
       )}

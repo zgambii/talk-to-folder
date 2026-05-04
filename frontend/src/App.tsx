@@ -6,26 +6,30 @@ import {
   logout,
   sendChatMessage,
 } from './api/client';
-import ChatPanel from './components/ChatPanel';
-import FolderIndexer from './components/FolderIndexer';
-import GoogleConnect from './components/GoogleConnect';
-import IndexingSummary from './components/IndexingSummary';
-import type { ChatResponse, IndexFolderResponse } from './types/api';
+import AppShell from './components/AppShell';
+import ChatView from './components/ChatView';
+import NewFolderModal from './components/NewFolderModal';
+import Sidebar from './components/Sidebar';
+import {
+  createChatMessage,
+  useFolderConversations,
+} from './hooks/useFolderConversations';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [folderUrl, setFolderUrl] = useState('');
-  const [indexingSummary, setIndexingSummary] =
-    useState<IndexFolderResponse | null>(null);
-  const [message, setMessage] = useState('');
-  const [chatResponse, setChatResponse] = useState<ChatResponse | null>(null);
+  const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
   const [isIndexing, setIsIndexing] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const folderId = indexingSummary?.folder_id ?? null;
-  const canIndex = isAuthenticated && folderUrl.trim().length > 0;
+  const {
+    activeConversation,
+    activeConversationId,
+    appendMessage,
+    conversations,
+    createConversation,
+    setActiveConversationId,
+  } = useFolderConversations();
 
   useEffect(() => {
     async function loadAuthStatus() {
@@ -46,29 +50,35 @@ function App() {
     window.location.assign(googleLoginUrl());
   }
 
+  function handleOpenNewFolderModal() {
+    setError(null);
+    setIsNewFolderModalOpen(true);
+  }
+
   async function handleLogout() {
     setError(null);
 
     try {
       await logout();
       setIsAuthenticated(false);
-      setIndexingSummary(null);
-      setChatResponse(null);
     } catch (caughtError) {
       setError(errorMessage(caughtError));
     }
   }
 
-  async function handleIndexFolder() {
+  async function handleIndexFolder(folderUrl: string) {
     setIsIndexing(true);
     setError(null);
-    setChatResponse(null);
 
     try {
       const summary = await indexFolder({
         folderUrl,
       });
-      setIndexingSummary(summary);
+      createConversation({
+        folderUrl,
+        indexingSummary: summary,
+      });
+      setIsNewFolderModalOpen(false);
     } catch (caughtError) {
       setError(errorMessage(caughtError));
     } finally {
@@ -76,11 +86,19 @@ function App() {
     }
   }
 
-  async function handleSendMessage() {
-    if (folderId === null) {
+  async function handleSendMessage(message: string) {
+    if (activeConversation === null) {
       return;
     }
 
+    const conversationId = activeConversation.id;
+    const folderId = activeConversation.folderId;
+    const userMessage = createChatMessage({
+      role: 'user',
+      content: message,
+    });
+
+    appendMessage(conversationId, userMessage);
     setIsSending(true);
     setError(null);
 
@@ -89,7 +107,16 @@ function App() {
         folderId,
         message,
       });
-      setChatResponse(response);
+      appendMessage(
+        conversationId,
+        createChatMessage({
+          role: 'assistant',
+          content: response.answer,
+          confidence: response.confidence,
+          citations: response.citations,
+          retrievedChunks: response.retrieved_chunks,
+        }),
+      );
     } catch (caughtError) {
       setError(errorMessage(caughtError));
     } finally {
@@ -98,47 +125,42 @@ function App() {
   }
 
   return (
-    <main className="app-shell">
-      <header className="hero">
-        <p className="eyebrow">Talk to Folder</p>
-        <h1>Ask grounded questions about a Google Drive folder.</h1>
-        <p>
-          Connect Google Drive, index a folder, then ask questions backed by
-          retrieved sources.
-        </p>
-      </header>
-
-      {error !== null && <div className="error-banner">{error}</div>}
-
-      <div className="content-grid">
-        <div className="stack">
-          <GoogleConnect
+    <>
+      <AppShell
+        sidebar={
+          <Sidebar
+            activeConversationId={activeConversationId}
+            conversations={conversations}
             isAuthenticated={isAuthenticated}
-            isLoading={isAuthLoading}
-            onConnect={handleConnectGoogle}
+            isAuthLoading={isAuthLoading}
+            onConnectGoogle={handleConnectGoogle}
             onLogout={handleLogout}
+            onNewFolderChat={handleOpenNewFolderModal}
+            onSelectConversation={setActiveConversationId}
           />
-          <FolderIndexer
-            folderUrl={folderUrl}
-            isIndexing={isIndexing}
-            canIndex={canIndex}
-            isAuthenticated={isAuthenticated}
-            onFolderUrlChange={setFolderUrl}
-            onIndexFolder={handleIndexFolder}
-          />
-          <IndexingSummary summary={indexingSummary} />
-        </div>
-
-        <ChatPanel
-          folderId={folderId}
-          message={message}
+        }
+      >
+        <ChatView
+          activeConversation={activeConversation}
+          error={error}
+          isAuthenticated={isAuthenticated}
+          isAuthLoading={isAuthLoading}
           isSending={isSending}
-          response={chatResponse}
-          onMessageChange={setMessage}
+          onConnectGoogle={handleConnectGoogle}
+          onNewFolderChat={handleOpenNewFolderModal}
           onSendMessage={handleSendMessage}
         />
-      </div>
-    </main>
+      </AppShell>
+      {isNewFolderModalOpen && (
+        <NewFolderModal
+          error={error}
+          isIndexing={isIndexing}
+          isOpen={isNewFolderModalOpen}
+          onClose={() => setIsNewFolderModalOpen(false)}
+          onSubmit={handleIndexFolder}
+        />
+      )}
+    </>
   );
 }
 

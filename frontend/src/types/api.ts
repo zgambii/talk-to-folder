@@ -49,6 +49,27 @@ export type ChatResponse = {
   retrieved_chunks: RetrievedChunk[];
 };
 
+export type ChatUiMessage = {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
+  confidence?: Confidence;
+  citations?: Citation[];
+  retrievedChunks?: RetrievedChunk[];
+};
+
+export type FolderConversation = {
+  id: string;
+  folderId: string;
+  folderUrl: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  indexingSummary?: IndexFolderResponse;
+  messages: ChatUiMessage[];
+};
+
 export type AuthStatusResponse = {
   authenticated: boolean;
 };

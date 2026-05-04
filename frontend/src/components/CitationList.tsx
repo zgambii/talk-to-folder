@@ -10,13 +10,16 @@ function CitationList({ citations }: CitationListProps) {
   }
 
   return (
-    <div className="stack">
-      <h3>Citations</h3>
-      <ul className="list">
+    <div className="citation-block">
+      <span>Citations</span>
+      <ul className="citation-list">
         {citations.map((citation) => (
-          <li key={`${citation.chunk_id}-${citation.quote}`}>
+          <li
+            className="citation-card"
+            key={`${citation.chunk_id}-${citation.quote}`}
+          >
             <strong>{citation.document_name}</strong>
-            <span>"{citation.quote}"</span>
+            <p>"{citation.quote}"</p>
             {citation.source_url !== null && (
               <a href={citation.source_url} target="_blank" rel="noreferrer">
                 Open source
