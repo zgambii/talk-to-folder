@@ -14,3 +14,4 @@ backend/.ruff_cache/
 backend/*.egg-info/
 
 *.pyc
+*.chroma/
