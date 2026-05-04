@@ -1,6 +1,11 @@
 import os
 from dataclasses import dataclass
 from functools import lru_cache
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+ENV_FILE_PATH = Path(__file__).resolve().parents[2] / ".env"
 
 
 @dataclass(frozen=True)
@@ -28,6 +33,7 @@ class Settings:
 def get_settings() -> Settings:
     """Return cached application settings for dependency-free config access."""
 
+    load_dotenv(ENV_FILE_PATH)
     return Settings(
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         openai_embedding_model=os.getenv(
