@@ -17,6 +17,26 @@ class GoogleDriveClient:
         credentials = Credentials(token=access_token)
         self._service = build("drive", "v3", credentials=credentials)
 
+    def get_file_name(self, file_id: str) -> str | None:
+        """Return the Drive item display name, or None if the API omits it."""
+
+        try:
+            response = (
+                self._service.files()
+                .get(fileId=file_id, fields="name")
+                .execute()
+            )
+        except GoogleApiError as exc:
+            raise GoogleDriveIntegrationError(
+                "Could not read metadata for the Google Drive folder."
+            ) from exc
+
+        name = response.get("name")
+        if name is None or name == "":
+            return None
+
+        return str(name)
+
     def list_folder_files(self, folder_id: str) -> list[DriveFile]:
         files: list[DriveFile] = []
         page_token: str | None = None

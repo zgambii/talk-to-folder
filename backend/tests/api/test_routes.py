@@ -118,6 +118,7 @@ def test_index_folder_returns_summary_when_authenticated(client: TestClient) -> 
     assert response.json() == {
         "folder_id": "folder-123",
         "folder_url": "https://drive.google.com/drive/folders/folder-123",
+        "name": None,
         "files_found": 2,
         "files_indexed": 1,
         "chunks_created": 3,

@@ -37,6 +37,7 @@ class FolderIndexingService:
         """
 
         folder_id = parse_google_drive_folder_url(folder_url)
+        folder_name = self._drive_client.get_file_name(folder_id)
         files = self._drive_client.list_folder_files(folder_id)
 
         # Re-indexing replaces the folder's previous vectors with a fresh set.
@@ -65,7 +66,7 @@ class FolderIndexingService:
         return IndexedFolder(
             folder_id=folder_id,
             folder_url=folder_url.strip(),
-            name=None,
+            name=folder_name,
             files_found=len(files),
             files_indexed=files_indexed,
             chunks_created=len(chunks),

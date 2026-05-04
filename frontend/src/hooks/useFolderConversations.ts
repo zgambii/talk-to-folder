@@ -50,7 +50,7 @@ export function useFolderConversations() {
         id: createId(),
         folderId: indexingSummary.folder_id,
         folderUrl,
-        title: titleFromFolderUrl(folderUrl),
+        title: conversationTitle(indexingSummary),
         createdAt: now,
         updatedAt: now,
         indexingSummary,
@@ -158,20 +158,10 @@ function isFolderConversation(value: unknown): value is FolderConversation {
   );
 }
 
-function titleFromFolderUrl(folderUrl: string): string {
-  try {
-    const url = new URL(folderUrl);
-    const foldersIndex = url.pathname.split('/').findIndex((part) => {
-      return part === 'folders';
-    });
-    const folderId =
-      foldersIndex >= 0 ? url.pathname.split('/')[foldersIndex + 1] : '';
-
-    if (folderId !== undefined && folderId.length > 0) {
-      return `Drive Folder ${folderId.slice(0, 6)}`;
-    }
-  } catch {
-    // Fall back to a generic title for non-standard pasted links.
+function conversationTitle(summary: IndexFolderResponse): string {
+  const name = summary.name?.trim();
+  if (name !== undefined && name.length > 0) {
+    return name;
   }
 
   return 'Drive Folder';

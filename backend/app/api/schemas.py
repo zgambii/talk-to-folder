@@ -13,6 +13,7 @@ class IndexFolderRequest(BaseModel):
 class IndexFolderResponse(BaseModel):
     folder_id: str
     folder_url: str
+    name: str | None = None
     files_found: int
     files_indexed: int
     chunks_created: int

@@ -8,9 +8,19 @@ from app.integrations.google.extraction import (
 
 # These fakes keep service tests focused on orchestration, not external APIs.
 class FakeDriveClient:
-    def __init__(self, files: list[DriveFile]) -> None:
+    def __init__(
+        self,
+        files: list[DriveFile],
+        *,
+        folder_name: str | None = "Q4 Planning",
+    ) -> None:
         self.files = files
+        self._folder_name = folder_name
         self.listed_folder_ids: list[str] = []
+
+    def get_file_name(self, file_id: str) -> str | None:
+        del file_id
+        return self._folder_name
 
     def list_folder_files(self, folder_id: str) -> list[DriveFile]:
         self.listed_folder_ids.append(folder_id)
@@ -76,6 +86,7 @@ def test_index_folder_successfully_indexes_supported_files() -> None:
     result = service.index_folder("https://drive.google.com/drive/folders/folder-123")
 
     assert result.folder_id == "folder-123"
+    assert result.name == "Q4 Planning"
     assert result.files_found == 1
     assert result.files_indexed == 1
     assert result.chunks_created == 2

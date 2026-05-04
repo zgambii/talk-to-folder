@@ -31,6 +31,8 @@ export type IndexFolderRequest = {
 export type IndexFolderResponse = {
   folder_id: string;
   folder_url: string;
+  /** Present after backend returns Drive metadata; omit on older servers. */
+  name?: string | null;
   files_found: number;
   files_indexed: number;
   chunks_created: number;
