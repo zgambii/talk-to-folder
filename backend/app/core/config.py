@@ -20,6 +20,9 @@ class Settings:
     openai_embedding_model: str
     openai_answer_model: str
     chroma_path: str
+    vector_store_provider: str
+    supabase_url: str | None
+    supabase_service_role_key: str | None
     frontend_origin: str | None
     app_env: str
     google_client_id: str | None
@@ -42,6 +45,9 @@ def get_settings() -> Settings:
         ),
         openai_answer_model=os.getenv("OPENAI_ANSWER_MODEL", "gpt-4.1-mini"),
         chroma_path=os.getenv("CHROMA_PATH", ".chroma"),
+        vector_store_provider=os.getenv("VECTOR_STORE_PROVIDER", "chroma"),
+        supabase_url=os.getenv("SUPABASE_URL"),
+        supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
         frontend_origin=os.getenv("FRONTEND_ORIGIN"),
         app_env=os.getenv("APP_ENV", "development"),
         google_client_id=os.getenv("GOOGLE_CLIENT_ID"),

@@ -53,6 +53,27 @@ ruff check .
 black --check .
 ```
 
+### Vector Store
+
+Local development uses Chroma by default:
+
+```env
+VECTOR_STORE_PROVIDER=chroma
+CHROMA_PATH=.chroma
+```
+
+For a deployed Supabase Postgres + pgvector store:
+
+```env
+VECTOR_STORE_PROVIDER=supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+Run `backend/migrations/001_vector_store.sql` in the Supabase SQL editor before switching providers. The migration enables `pgvector`, creates the `document_chunks` table, adds indexes, and defines the `match_document_chunks` RPC used by the backend.
+
+Keep `SUPABASE_SERVICE_ROLE_KEY` on the backend only. Never expose it in frontend environment variables or browser code.
+
 ## Local Development
 
 Run the frontend and backend in separate terminals. By default, the frontend expects the backend at `http://localhost:8000`.

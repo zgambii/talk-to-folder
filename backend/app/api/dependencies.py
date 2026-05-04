@@ -4,12 +4,15 @@ from fastapi import Depends, HTTPException, Request, status
 
 from app.ai.answer_generator import AnswerGenerator
 from app.ai.embeddings import EmbeddingService
+from app.ai.vector_store import VectorStore
+from app.core.config import get_settings
 from app.domain.chat.service import ChatService
 from app.domain.folders.service import FolderIndexingService
 from app.integrations.google.drive import GoogleDriveClient
 from app.integrations.google.extraction import GoogleDriveExtractor
 from app.integrations.google.oauth import get_tokens_from_session
 from app.storage.chroma_store import ChromaVectorStore
+from app.storage.supabase_vector_store import SupabaseVectorStore
 
 
 def get_google_access_token(request: Request) -> str:
@@ -20,8 +23,12 @@ def get_google_access_token(request: Request) -> str:
     return tokens.access_token
 
 
-def get_vector_store() -> ChromaVectorStore:
-    return ChromaVectorStore()
+def get_vector_store() -> VectorStore:
+    settings = get_settings()
+    if settings.vector_store_provider == "supabase":
+        return SupabaseVectorStore(settings=settings)
+
+    return ChromaVectorStore(settings=settings)
 
 
 def get_embedding_service() -> EmbeddingService:
@@ -35,7 +42,7 @@ def get_answer_generator() -> AnswerGenerator:
 def get_folder_indexing_service(
     access_token: Annotated[str, Depends(get_google_access_token)],
     embedding_service: Annotated[EmbeddingService, Depends(get_embedding_service)],
-    vector_store: Annotated[ChromaVectorStore, Depends(get_vector_store)],
+    vector_store: Annotated[VectorStore, Depends(get_vector_store)],
 ) -> FolderIndexingService:
     return FolderIndexingService(
         drive_client=GoogleDriveClient(access_token),
@@ -47,7 +54,7 @@ def get_folder_indexing_service(
 
 def get_chat_service(
     embedding_service: Annotated[EmbeddingService, Depends(get_embedding_service)],
-    vector_store: Annotated[ChromaVectorStore, Depends(get_vector_store)],
+    vector_store: Annotated[VectorStore, Depends(get_vector_store)],
     answer_generator: Annotated[AnswerGenerator, Depends(get_answer_generator)],
 ) -> ChatService:
     return ChatService(
