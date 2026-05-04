@@ -24,12 +24,13 @@ class Settings:
     supabase_url: str | None
     supabase_service_role_key: str | None
     frontend_origin: str | None
-    app_env: str
+    environment: str
     google_client_id: str | None
     google_client_secret: str | None
     google_redirect_uri: str
     frontend_url: str
     session_secret_key: str
+    session_cookie_name: str
 
 
 @lru_cache
@@ -43,13 +44,16 @@ def get_settings() -> Settings:
             "OPENAI_EMBEDDING_MODEL",
             "text-embedding-3-small",
         ),
-        openai_answer_model=os.getenv("OPENAI_ANSWER_MODEL", "gpt-4.1-mini"),
+        openai_answer_model=os.getenv(
+            "OPENAI_CHAT_MODEL",
+            os.getenv("OPENAI_ANSWER_MODEL", "gpt-4.1-mini"),
+        ),
         chroma_path=os.getenv("CHROMA_PATH", ".chroma"),
         vector_store_provider=os.getenv("VECTOR_STORE_PROVIDER", "chroma"),
         supabase_url=os.getenv("SUPABASE_URL"),
         supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
         frontend_origin=os.getenv("FRONTEND_ORIGIN"),
-        app_env=os.getenv("APP_ENV", "development"),
+        environment=os.getenv("ENVIRONMENT", os.getenv("APP_ENV", "development")),
         google_client_id=os.getenv("GOOGLE_CLIENT_ID"),
         google_client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
         google_redirect_uri=os.getenv(
@@ -58,4 +62,5 @@ def get_settings() -> Settings:
         ),
         frontend_url=os.getenv("FRONTEND_URL", "http://localhost:5173"),
         session_secret_key=os.getenv("SESSION_SECRET_KEY", "dev-session-secret"),
+        session_cookie_name=os.getenv("SESSION_COOKIE_NAME", "talk_to_folder_session"),
     )

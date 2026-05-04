@@ -13,11 +13,14 @@ def test_get_settings_loads_backend_env_file(
     env_file.write_text(
         "\n".join(
             [
+                "ENVIRONMENT=production",
                 "GOOGLE_CLIENT_ID=test-client-id",
                 "GOOGLE_CLIENT_SECRET=test-client-secret",
                 "GOOGLE_REDIRECT_URI=http://localhost:8000/api/auth/google/callback",
                 "FRONTEND_URL=http://localhost:5173",
                 "SESSION_SECRET_KEY=test-session-secret",
+                "SESSION_COOKIE_NAME=test-session",
+                "OPENAI_CHAT_MODEL=test-chat-model",
                 "VECTOR_STORE_PROVIDER=supabase",
                 "SUPABASE_URL=https://example.supabase.co",
                 "SUPABASE_SERVICE_ROLE_KEY=test-service-role-key",
@@ -26,11 +29,14 @@ def test_get_settings_loads_backend_env_file(
         encoding="utf-8",
     )
     monkeypatch.setattr(config, "ENV_FILE_PATH", env_file)
+    monkeypatch.delenv("ENVIRONMENT", raising=False)
     monkeypatch.delenv("GOOGLE_CLIENT_ID", raising=False)
     monkeypatch.delenv("GOOGLE_CLIENT_SECRET", raising=False)
     monkeypatch.delenv("GOOGLE_REDIRECT_URI", raising=False)
     monkeypatch.delenv("FRONTEND_URL", raising=False)
     monkeypatch.delenv("SESSION_SECRET_KEY", raising=False)
+    monkeypatch.delenv("SESSION_COOKIE_NAME", raising=False)
+    monkeypatch.delenv("OPENAI_CHAT_MODEL", raising=False)
     monkeypatch.delenv("VECTOR_STORE_PROVIDER", raising=False)
     monkeypatch.delenv("SUPABASE_URL", raising=False)
     monkeypatch.delenv("SUPABASE_SERVICE_ROLE_KEY", raising=False)
@@ -45,6 +51,9 @@ def test_get_settings_loads_backend_env_file(
     )
     assert settings.frontend_url == "http://localhost:5173"
     assert settings.session_secret_key == "test-session-secret"
+    assert settings.session_cookie_name == "test-session"
+    assert settings.environment == "production"
+    assert settings.openai_answer_model == "test-chat-model"
     assert settings.vector_store_provider == "supabase"
     assert settings.supabase_url == "https://example.supabase.co"
     assert settings.supabase_service_role_key == "test-service-role-key"

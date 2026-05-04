@@ -19,12 +19,13 @@ if settings.frontend_origin is not None:
 if settings.frontend_url not in allowed_origins:
     allowed_origins.append(settings.frontend_url)
 
-session_cookie_secure = settings.app_env == "production"
+session_cookie_secure = settings.environment == "production"
 session_same_site = "none" if session_cookie_secure else "lax"
 
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.session_secret_key,
+    session_cookie=settings.session_cookie_name,
     same_site=session_same_site,
     https_only=session_cookie_secure,
 )
