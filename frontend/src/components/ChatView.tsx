@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import type { FolderConversation } from '../types/api';
 import ChatInput from './ChatInput';
 import ChatMessage from './ChatMessage';
@@ -35,6 +34,11 @@ function ChatView({
 
   return (
     <section className="chat-view">
+      {error !== null && (
+        <div className="chat-error-bar" role="alert">
+          {error}
+        </div>
+      )}
       <div className="chat-scroll">
         {isAuthenticated && activeConversation !== null && (
           <header className="chat-header">
@@ -64,7 +68,7 @@ function ChatView({
 
         {!isAuthenticated && !isAuthLoading && (
           <div className="center-state">
-            <p className="eyebrow">Google Drive required</p>
+            <p className="eyebrow">Talk to Folder</p>
             <h1>Connect Google Drive to chat with your folders.</h1>
             <p>
               Once connected, paste a folder link and we will build a searchable
@@ -126,8 +130,6 @@ function ChatView({
               )}
             </div>
           )}
-
-        {error !== null && <div className="inline-error">{error}</div>}
       </div>
 
       <div className="chat-input-panel">

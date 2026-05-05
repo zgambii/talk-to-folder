@@ -12,7 +12,13 @@ function GoogleConnect({
   onLogout,
 }: GoogleConnectProps) {
   return (
-    <section className="google-connect">
+    <section
+      className={
+        isAuthenticated
+          ? 'google-connect'
+          : 'google-connect google-connect--plain'
+      }
+    >
       {isAuthenticated ? (
         <div>
           <span className="connection-dot" />
