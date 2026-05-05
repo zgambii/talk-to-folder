@@ -6,6 +6,8 @@ The app is built around a source-grounded RAG pipeline. It does not treat the LL
 
 The result is a ChatGPT-style UI built around folder-scoped conversations: paste a folder URL to open a new chat, revisit earlier folders from the sidebar (each restores its thread), and read answers with citations and inspectable retrieved context. For this take-home, conversation history is stored in the browser (localStorage), not on the server.
 
+**YouTube Demo:** https://youtu.be/C9S9gq6fKQQ
+
 ## Live demo
 
 | Surface | URL |
