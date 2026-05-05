@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { FolderConversation } from '../types/api';
 import FolderConversationList from './FolderConversationList';
 import GoogleConnect from './GoogleConnect';
@@ -54,6 +55,12 @@ function Sidebar({
         onConnect={onConnectGoogle}
         onLogout={onLogout}
       />
+
+      <nav className="sidebar-legal" aria-label="Legal">
+        <Link to="/privacy">Privacy Policy</Link>
+        <span aria-hidden="true">·</span>
+        <Link to="/terms">Terms of Service</Link>
+      </nav>
     </aside>
   );
 }

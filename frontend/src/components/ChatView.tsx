@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { FolderConversation } from '../types/api';
 import ChatInput from './ChatInput';
 import ChatMessage from './ChatMessage';
