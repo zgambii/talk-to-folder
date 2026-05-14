@@ -71,7 +71,3 @@ Detail lives in `docs/` so this README stays a short entry point
 | [Deployment](docs/deployment.md) | Supabase migration, Google OAuth, Render, Vercel |
 | [Development](docs/development.md) | `pytest`, Ruff, Black, frontend lint/build/Prettier |
 | [Tradeoffs & roadmap](docs/tradeoffs.md) | Intentional limits of the take-home and possible next steps |
-
----
-
-Thank you for your time! This was a thought-provoking and enjoyable take home to work on. I was able to use my prior experiences but also learned a few things along the way.
